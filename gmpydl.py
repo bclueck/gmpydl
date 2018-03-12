@@ -212,7 +212,7 @@ def download_song(api, sid, update_dl):
         return True
     except RuntimeError:
         log("Unknown error...")
-        return True
+        return False
 
 def main():
     if not load_settings():
