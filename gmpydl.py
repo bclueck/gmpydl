@@ -198,9 +198,10 @@ def download_song(api, sid, update_dl):
                         dl_store.sync()
                     return True
         # do the download
-        filename, audio = api.download_song(song['id'])
-        filepath = os.path.join(path, filename)
         try:
+            filename, audio = api.download_song(song['id'])
+            filepath = os.path.join(path, filename)
+
             with open(filepath, 'wb') as f:
                 f.write(audio)
             if update_dl:
