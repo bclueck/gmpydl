@@ -181,7 +181,7 @@ def download_song(api, sid, update_dl):
             os.makedirs(path)
         except OSError as e:
             log("Error making directory: %s" % e)
-            return False 
+            return False
         except IOError:
             log("Failed to make dir")
             return False
@@ -246,7 +246,7 @@ def get_input():
 def searchmain():
     if not load_settings():
         return False
-    api = api_init()
+    api = api_init() 
     fill_all_store(api)
     term, termtyp = get_input()
     term = term.lower().strip()
