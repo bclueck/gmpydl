@@ -199,9 +199,12 @@ def download_song(api, sid, update_dl):
                     return True
         # do the download
         try:
-            filename, audio = api.download_song(song['id'])
-            filepath = os.path.join(path, filename)
-
+            try:
+                filename, audio = api.download_song(song['id'])
+                filepath = os.path.join(path, filename)
+            except RuntimeError:
+                log("Not availabe")
+                return True
             with open(filepath, 'wb') as f:
                 f.write(audio)
             if update_dl:
