@@ -202,7 +202,7 @@ def download_song(api, sid, update_dl):
             try:
                 filename, audio = api.download_song(song['id'])
                 filepath = os.path.join(path, filename)
-            except gmusicapi.exceptions.CallFailure:
+            except:
                 log("Not availabe")
                 return True
             with open(filepath, 'wb') as f:
