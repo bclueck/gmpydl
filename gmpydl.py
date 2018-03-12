@@ -166,49 +166,53 @@ def get_song_data(song):
     return song['artist'], song['album'], song['album_artist'], song['title']
 
 def download_song(api, sid, update_dl):
-    song = all_store[sid]
-    artist, album, alb_artist, title = get_song_data(song)
-    if alb_artist and alb_artist != artist:
-        alb_artist_short = alb_artist.split(';')
-        if len(alb_artist_short) > 0:
-            alb_artist = alb_artist_short[0]
-        path = os.path.expanduser("%s/%s/%s" % (settings['dest'], alb_artist, album))
-    else:
-        path = os.path.expanduser("%s/%s/%s" % (settings['dest'], artist, album))
-    log("Starting download of %s - %s" % (artist, title))
-    if not os.path.exists(path):
-        try:
-            os.makedirs(path)
-        except OSError as e:
-            log("Error making directory: %s" % e)
-            return False
-        except IOError:
-            log("Failed to make dir")
-            return False
-    else:
-        # check if the filename already exists
-        # Build filename like "02 - track title.mp3" (like Gmusic passes when we download)
-        f = "%s/%02d - %s.mp3" % (path, song['track_number'], song['title'])
-        if os.path.isfile(f):
-            if not OVERWRITE:
-                log("File already exists - marking as downloaded (enable Overwrite to re-download)")
-                if update_dl:
-                    dl_store[sid] = all_store[sid]
-                    dl_store.sync()
-                return True
-    # do the download
-    filename, audio = api.download_song(song['id'])
-    filepath = os.path.join(path, filename)
     try:
-        with open(filepath, 'wb') as f:
-            f.write(audio)
-        if update_dl:
-            dl_store[sid] = all_store[sid]
-            dl_store.sync()
-    except IOError:
-        log("Failed to write %s " % filepath)
-        return False
-    return True
+        song = all_store[sid]
+        artist, album, alb_artist, title = get_song_data(song)
+        if alb_artist and alb_artist != artist:
+            alb_artist_short = alb_artist.split(';')
+            if len(alb_artist_short) > 0:
+                alb_artist = alb_artist_short[0]
+            path = os.path.expanduser("%s/%s/%s" % (settings['dest'], alb_artist, album))
+        else:
+            path = os.path.expanduser("%s/%s/%s" % (settings['dest'], artist, album))
+        log("Starting download of %s - %s" % (artist, title))
+        if not os.path.exists(path):
+            try:
+                os.makedirs(path)
+            except OSError as e:
+                log("Error making directory: %s" % e)
+                return False
+            except IOError:
+                log("Failed to make dir")
+                return False
+        else:
+            # check if the filename already exists
+            # Build filename like "02 - track title.mp3" (like Gmusic passes when we download)
+            f = "%s/%02d - %s.mp3" % (path, song['track_number'], song['title'])
+            if os.path.isfile(f):
+                if not OVERWRITE:
+                    log("File already exists - marking as downloaded (enable Overwrite to re-download)")
+                    if update_dl:
+                        dl_store[sid] = all_store[sid]
+                        dl_store.sync()
+                    return True
+        # do the download
+        filename, audio = api.download_song(song['id'])
+        filepath = os.path.join(path, filename)
+        try:
+            with open(filepath, 'wb') as f:
+                f.write(audio)
+            if update_dl:
+                dl_store[sid] = all_store[sid]
+                dl_store.sync()
+        except IOError:
+            log("Failed to write %s " % filepath)
+            return False
+        return True
+    except RuntimeError:
+        log("Unknown error...")
+        return True
 
 def main():
     if not load_settings():
@@ -246,7 +250,7 @@ def get_input():
 def searchmain():
     if not load_settings():
         return False
-    api = api_init() 
+    api = api_init()
     fill_all_store(api)
     term, termtyp = get_input()
     term = term.lower().strip()
